@@ -36,6 +36,13 @@ var NewsChain = function (dhtPort, hyperlogPort) {
 
   // Listen for connections that will trigger updates to the Merkle DAG.
   net.createServer((socket) => {
+    // Ignore connections to self
+    if(socket.localAddress === socket.remoteAddress && this.port === socket.localPort) {
+        console.log('Ignoring connection to self')
+        socket.destroy()
+        return
+    }
+
     console.log('Received connection from ', getAddress(socket))
     this.connections[getAddress(socket)] = socket
 
