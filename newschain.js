@@ -53,6 +53,8 @@ module.exports = function (dhtPort, hyperlogPort) {
     replicatedLogSocket.pipe(socket).pipe(replicatedLogSocket)
   }).listen(port, '127.0.0.1')
 
+  console.log(`Listening on port ${port}`)
+
   /**
    * Adds an entry to the NewsChain.
    * @param {String}           value The value to add to the NewsChain.

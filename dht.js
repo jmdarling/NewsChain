@@ -42,7 +42,7 @@ var getPeersPromise = null
 function getPeers (dht) {
   if (getPeersPromise) return getPeersPromise
 
-  return getPeersPromise = new Promise((resolve, reject) => {
+  getPeersPromise = new Promise((resolve, reject) => {
     console.log('Looking up peers')
     const peers = []
 
@@ -51,7 +51,7 @@ function getPeers (dht) {
         getPeersPromise = null
         return reject(err)
       }
-      getPeersPromise = null;
+      getPeersPromise = null
       resolve(_.uniqBy(peers, (p) => p.host + p.port))
     })
 
@@ -65,6 +65,8 @@ function getPeers (dht) {
       peers.push(peer)
     })
   })
+
+  return getPeersPromise
 }
 
 module.exports = {createDHTNode, getPeers}
