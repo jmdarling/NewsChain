@@ -43,6 +43,12 @@ module.exports = function (dhtPort, hyperlogPort) {
       delete connections[getAddress(socket)]
     })
 
+    socket.on('error', (err) => {
+      console.error('Disconnected due to error from', getAddress(socket))
+      console.error(err)
+      delete connections[getAddress(socket)]
+    })
+
     var replicatedLogSocket = log.replicate({live: true})
     replicatedLogSocket.pipe(socket).pipe(replicatedLogSocket)
   }).listen(port, '127.0.0.1')
@@ -129,6 +135,11 @@ module.exports = function (dhtPort, hyperlogPort) {
         })
         socket.on('close', () => {
           console.log('Disconnected from', getAddress(socket))
+          delete connections[getAddress(socket)]
+        })
+        socket.on('error', (err) => {
+          console.error('Disconnected due to error from', getAddress(socket))
+          console.error(err)
           delete connections[getAddress(socket)]
         })
       })
