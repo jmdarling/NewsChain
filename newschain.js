@@ -78,6 +78,12 @@ var NewsChain = function (dhtPort, hyperlogPort) {
         .catch((err) => {
           console.error(err)
         })
+      setInterval(() => {
+          this.updatePeers()
+            .catch((err) => {
+              console.error(err)
+            })
+      }, 5 * 60 * 1000)
     })
     .catch((err) => console.error('Failed to get external IP.', err))
 }
@@ -96,10 +102,6 @@ NewsChain.prototype.add = function (value, link) {
   return new Promise((resolve, reject) => {
     this.log.add(link || null, value, (err, node) => {
       if (err) return reject(err)
-      this.updatePeers()
-        .catch((err) => {
-          console.error(err)
-        })
       resolve(node.key)
     })
   })
