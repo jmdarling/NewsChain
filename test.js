@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
 app.get('/load', (req, res) => {
   var loadCount = req.query.count || 5000
 
-  for(var i = 0; i < loadCount; i++) {
+  for (var i = 0; i < loadCount; i++) {
     newsChain.add(chance.string())
       .then((hash) => {
         console.log(`Added ${hash}`)
