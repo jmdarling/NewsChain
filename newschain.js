@@ -51,7 +51,7 @@ module.exports = function (dhtPort, hyperlogPort) {
 
     var replicatedLogSocket = log.replicate({live: true})
     replicatedLogSocket.pipe(socket).pipe(replicatedLogSocket)
-  }).listen(port, '127.0.0.1')
+  }).listen(port)
 
   console.log(`Listening on port ${port}`)
 
