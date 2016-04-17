@@ -3,7 +3,6 @@
 var hyperlog = require('hyperlog')
 var levelup = require('levelup')
 var net = require('net')
-
 var DHT = require('./dht')
 var util = require('./util')
 
@@ -51,7 +50,6 @@ var NewsChain = function (dhtPort, hyperlogPort) {
       net.createServer((socket) => {
         // Ignore connections to self
         if (socket.localAddress === socket.remoteAddress && this.port === socket.localPort) {
-          console.log('Ignoring connection to self')
           socket.destroy()
           return
         }
@@ -65,7 +63,7 @@ var NewsChain = function (dhtPort, hyperlogPort) {
         })
 
         socket.on('error', (err) => {
-          console.error('Error from', getAddress(socket))
+          console.error('Error from ', getAddress(socket))
           console.error(err)
           replicatedLogSocket.destroy()
           delete this.connections[getAddress(socket)]
@@ -80,7 +78,7 @@ var NewsChain = function (dhtPort, hyperlogPort) {
         })
       }).listen(this.port)
 
-      console.log(`Listening on port ${this.port}`)
+      console.log(`Hyperlog listening on port ${this.port}`)
 
       this.updatePeers()
         .catch((err) => {
@@ -164,7 +162,7 @@ NewsChain.prototype.updatePeers = function () {
     return DHT.getPeers(this.dht)
   })
     .then((peerList) => {
-      console.log('got peers', peerList)
+      console.log('Connected to peers: ', peerList)
       this.peers = peerList
 
       this.peers
@@ -179,7 +177,7 @@ NewsChain.prototype.updatePeers = function () {
           var replicatedLogSocket = this.log.replicate({live: true})
 
           socket.on('connect', () => {
-            console.log('Connected to', getAddress(socket))
+            console.log('Connected to ', getAddress(socket))
             this.connections[getAddress(socket)] = socket
 
             replicatedLogSocket.pipe(socket).pipe(replicatedLogSocket)
