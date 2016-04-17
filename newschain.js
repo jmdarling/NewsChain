@@ -144,6 +144,9 @@ module.exports = function (dhtPort, hyperlogPort) {
           console.error(err)
           delete connections[getAddress(socket)]
         })
+
+        var replicatedLogSocket = log.replicate({live: true})
+        replicatedLogSocket.pipe(socket).pipe(replicatedLogSocket)
       })
     })
   }
