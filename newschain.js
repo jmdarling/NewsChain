@@ -11,6 +11,12 @@ function getAddress (socket) {
   return socket.remoteAddress + ':' + socket.remotePort
 }
 
+function shortenString (target) {
+  if (!target) return null
+  if (target.length < 50) return target
+  return target.substring(0, 47) + '...'
+}
+
 /**
  * Initialize the Merkel DAG service.
  * @param  {Number} port The port to listen for updates at.
@@ -26,7 +32,9 @@ var NewsChain = function (dhtPort, hyperlogPort) {
 
   // Initialize hyperlog logger.
   this.log = hyperlog(this.db)
-  this.log.on('add', (node) => console.log('Added node:', node.key, '->', node.value.toString()))
+
+  // Log every time a value is added to the NewsChain.
+  this.log.on('add', (node) => console.log('Added node:', node.key, '->', shortenString(node.value.toString())))
 
   this.dht = null
 
