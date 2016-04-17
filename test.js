@@ -4,6 +4,8 @@ var newsChain = new NewsChain(process.argv[2] || 6881, process.argv[3] || 1234)
 
 var express = require('express')
 
+var chance = require('chance')
+
 var app = express()
 
 app.get('/', (req, res) => {
@@ -11,6 +13,17 @@ app.get('/', (req, res) => {
   .then((hash) => {
     res.end(hash)
   })
+})
+
+app.get('/load', (req, res) => {
+  var loadCount = req.query.count || 5000
+
+  for(var i = 0; i < loadCount; i++) {
+    newsChain.add(chance.string())
+      .then((hash) => {
+        console.log(`Added ${hash}`)
+      })
+  }
 })
 
 app.get('/get/:id', (req, res) => {

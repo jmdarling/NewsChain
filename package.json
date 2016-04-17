@@ -11,6 +11,7 @@
   "dependencies": {
     "bittorrent-dht": "^7.0.2",
     "body-parser": "^1.15.0",
+    "chance": "^1.0.2",
     "ed25519-supercop": "^1.0.2",
     "express": "^4.13.4",
     "hyperlog": "^4.10.0",
