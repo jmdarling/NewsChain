@@ -110,6 +110,7 @@ NewsChain.prototype.get = function (key) {
   return new Promise((resolve, reject) => {
     this.log.get(key, null, (err, node) => {
       if (err) return reject(err)
+      console.log(node.value.toString())
       resolve(node.value.toString())
     })
   })
@@ -150,12 +151,11 @@ NewsChain.prototype.updatePeers = function () {
             host: peer.host,
             port: peer.port
           })
+          var replicatedLogSocket = this.log.replicate({live: true})
 
           socket.on('connect', () => {
             console.log('Connected to', getAddress(socket))
             this.connections[getAddress(socket)] = socket
-
-            var replicatedLogSocket = this.log.replicate({live: true})
             replicatedLogSocket.pipe(socket).pipe(replicatedLogSocket)
             replicatedLogSocket.on('error', (err) => {
               console.log('Log replication error')
