@@ -5,6 +5,7 @@ var levelup = require('levelup')
 var net = require('net')
 
 var DHT = require('./dht')
+var util = require('./util')
 
 function getAddress (socket) {
   return socket.remoteAddress + ':' + socket.remotePort
@@ -34,38 +35,51 @@ var NewsChain = function (dhtPort, hyperlogPort) {
 
   this.connections = {}
 
-  // Listen for connections that will trigger updates to the Merkle DAG.
-  net.createServer((socket) => {
-    console.log('Received connection from ', getAddress(socket))
-    this.connections[getAddress(socket)] = socket
+  util.getIP()
+    .then((ip) => {
+      this.ip = ip
 
-    socket.on('close', () => {
-      console.log('Disconnected from ', getAddress(socket))
-      delete this.connections[getAddress(socket)]
+      // Listen for connections that will trigger updates to the Merkle DAG.
+      net.createServer((socket) => {
+        // Ignore connections to self
+        if (socket.localAddress === socket.remoteAddress && this.port === socket.localPort) {
+          console.log('Ignoring connection to self')
+          socket.destroy()
+          return
+        }
+
+        console.log('Received connection from ', getAddress(socket))
+        this.connections[getAddress(socket)] = socket
+
+        socket.on('close', () => {
+          console.log('Disconnected from ', getAddress(socket))
+          delete this.connections[getAddress(socket)]
+        })
+
+        socket.on('error', (err) => {
+          console.error('Error from', getAddress(socket))
+          console.error(err)
+          replicatedLogSocket.destroy()
+          delete this.connections[getAddress(socket)]
+        })
+
+        var replicatedLogSocket = this.log.replicate({live: true})
+        replicatedLogSocket.pipe(socket).pipe(replicatedLogSocket)
+        replicatedLogSocket.on('error', (err) => {
+          console.log('Log replication error')
+          console.error(err)
+          socket.destroy()
+        })
+      }).listen(this.port)
+
+      console.log(`Listening on port ${this.port}`)
+
+      this.updatePeers()
+        .catch((err) => {
+          console.error(err)
+        })
     })
-
-    socket.on('error', (err) => {
-      console.error('Error from', getAddress(socket))
-      console.error(err)
-      replicatedLogSocket.destroy()
-      delete this.connections[getAddress(socket)]
-    })
-
-    var replicatedLogSocket = this.log.replicate({live: true})
-    replicatedLogSocket.pipe(socket).pipe(replicatedLogSocket)
-    replicatedLogSocket.on('error', (err) => {
-      console.log('Log replication error')
-      console.error(err)
-      socket.destroy()
-    })
-  }).listen(this.port)
-
-  console.log(`Listening on port ${this.port}`)
-
-  this.updatePeers()
-    .catch((err) => {
-      console.error(err)
-    })
+    .catch((err) => console.error('Failed to get external IP.', err))
 }
 
 /**
@@ -103,7 +117,6 @@ NewsChain.prototype.get = function (key) {
   return new Promise((resolve, reject) => {
     this.log.get(key, null, (err, node) => {
       if (err) return reject(err)
-      console.log(node.value.toString())
       resolve(node.value.toString())
     })
   })
@@ -138,17 +151,19 @@ NewsChain.prototype.updatePeers = function () {
 
       this.peers
         .filter((peer) => !this.connections[peer.host + ':' + peer.port])
+        .filter((peer) => peer.host !== this.ip)
         .forEach((peer) => {
           var socket = new net.Socket()
           socket.connect({
             host: peer.host,
             port: peer.port
           })
-          var replicatedLogSocket = this.log.replicate({live: true})
 
           socket.on('connect', () => {
             console.log('Connected to', getAddress(socket))
             this.connections[getAddress(socket)] = socket
+
+            var replicatedLogSocket = this.log.replicate({live: true})
             replicatedLogSocket.pipe(socket).pipe(replicatedLogSocket)
             replicatedLogSocket.on('error', (err) => {
               console.log('Log replication error')
