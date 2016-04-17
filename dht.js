@@ -27,8 +27,20 @@ function createDHTNode (dhtPort, hyperlogPort) {
     dht.listen(dhtPort)
     dht.once('listening', () => {
       console.log('DHT listening on port', dhtPort)
+
       // Anounce ourselves as a peer
-      dht.announce(HASH, hyperlogPort)
+      const announce = () => dht.announce(HASH, hyperlogPort, (err) => {
+        if (err) {
+          console.log('Failed to announce')
+          console.log(err)
+          return
+        }
+        console.log('Announced to DHT')
+      })
+
+      // Announce immediately and every 5 minutes
+      announce()
+      setInterval(announce, 5 * 60 * 1000)
       // Return DHT node now that it's ready
       resolve(dht)
     })
@@ -57,7 +69,6 @@ function getPeers (dht) {
 
     // When we find a new peer
     dht.on('peer', (peer, hash, from) => {
-      console.log('found hash peer', hash)
       if (hash.toString('hex') !== HASH) {
         console.log('wrong hash', hash.toString('hex'))
         return
