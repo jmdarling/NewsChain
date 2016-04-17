@@ -4,7 +4,8 @@ var newsChain = new NewsChain(process.argv[2] || 6881, process.argv[3] || 1234)
 
 var express = require('express')
 
-var chance = require('chance')
+var Chance = require('chance')
+var chance = new Chance()
 
 var app = express()
 
