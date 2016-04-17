@@ -3,6 +3,7 @@ var NewsChain = require('./newschain')
 var newsChain = new NewsChain(process.argv[2] || 6881, process.argv[3] || 1234)
 
 var express = require('express')
+var jsonStringifyStream = require('streaming-json-stringify')
 
 var Chance = require('chance')
 var chance = new Chance()
@@ -20,7 +21,7 @@ app.get('/load', (req, res) => {
   var loadCount = req.query.count || 5000
 
   for (var i = 0; i < loadCount; i++) {
-    newsChain.add(chance.paragraph() + '\n' + chance.paragraph() + '\n' + chance.paragraph() + '\n' + chance.paragraph() + '\n' + chance.paragraph())
+    newsChain.add(chance.string())
       .then((hash) => {
         console.log(`Added ${hash}`)
       })
@@ -38,7 +39,10 @@ app.get('/get/:id', (req, res) => {
 })
 
 app.get('/get', (req, res) => {
-  newsChain.getHeadsStream()
+  var stream = newsChain.getHeadsStream()
+  stream.on('error', (err) => console.log(err))
+  stream
+  .pipe(jsonStringifyStream())
   .pipe(res)
 })
 
