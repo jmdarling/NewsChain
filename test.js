@@ -26,6 +26,16 @@ app.get('/load', (req, res) => {
   }
 })
 
+app.get('/heads-bench', (req, res) => {
+  newsChain.getHeads()
+    .then((heads) => {
+      res.end(JSON.stringify(heads))
+    })
+    .catch((err) => {
+      res.end(err)
+    })
+})
+
 app.get('/get/:id', (req, res) => {
   newsChain.get(req.params.id)
     .then((value) => {
