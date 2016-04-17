@@ -1,6 +1,6 @@
 var NewsChain = require('./newschain')
 
-var newsChain = new NewsChain(process.argv[2] || 6881, process.argv[3] || 1234)
+var newsChain = new NewsChain(process.argv[2] || 6881)
 
 var express = require('express')
 var jsonStringifyStream = require('streaming-json-stringify')
@@ -48,6 +48,6 @@ app.get('/get', (req, res) => {
   .pipe(res)
 })
 
-app.listen(3000, function () {
+app.listen(process.argv[3] || 3000, function () {
   console.log('Example app listening on port 3000!')
 })
