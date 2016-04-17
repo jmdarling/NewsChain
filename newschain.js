@@ -31,7 +31,7 @@ var NewsChain = function (port) {
   sw.join('NewsChain')
   console.log('Listening to NewsChain swarm on port', this.port)
 
-  sw.on('connection', function (socket) {
+  sw.on('connection', (socket) => {
     console.log('Connected to', getAddress(socket))
     socket.on('error', (err) => {
         console.error(`Socket error${getAddress(socket)}:`, err)
