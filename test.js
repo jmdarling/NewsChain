@@ -38,13 +38,8 @@ app.get('/get/:id', (req, res) => {
 })
 
 app.get('/get', (req, res) => {
-  newsChain.getHeads()
-    .then((heads) => {
-      res.end(JSON.stringify(heads))
-    })
-    .catch((err) => {
-      res.status(500).end(err)
-    })
+  newsChain.getHeadsStream()
+  .pipe(res)
 })
 
 app.listen(3000, function () {

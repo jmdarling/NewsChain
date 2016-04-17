@@ -135,6 +135,14 @@ NewsChain.prototype.getHeads = function () {
   })
 }
 
+/**
+ * Returns a stream of all heads
+ * @param  {Function} callback Callback function with the nodeList as the arg.
+ */
+NewsChain.prototype.getHeadsStream = function () {
+  return this.log.heads()
+}
+
 NewsChain.prototype.updatePeers = function () {
   var promise = Promise.resolve(this.dht)
   if (!this.dht) {
@@ -159,12 +167,11 @@ NewsChain.prototype.updatePeers = function () {
             port: peer.port
           })
 
-          var replicatedLogSocket = this.log.replicate({live: true})
-
           socket.on('connect', () => {
             console.log('Connected to', getAddress(socket))
             this.connections[getAddress(socket)] = socket
 
+            var replicatedLogSocket = this.log.replicate({live: true})
             replicatedLogSocket.pipe(socket).pipe(replicatedLogSocket)
             replicatedLogSocket.on('error', (err) => {
               console.log('Log replication error')
